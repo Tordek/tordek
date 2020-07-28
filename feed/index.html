@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>Tordek</title>
+    <link href="http://tordek.me/feed/index.html" rel="self" />
+    <link href="http://tordek.me" />
+    <id>http://tordek.me/feed/index.html</id>
+    <author>
+        <name>Tordek</name>
+        <email>blogspam@tordek.me</email>
+    </author>
+    <updated>2014-12-03T00:00:00Z</updated>
+    <entry>
+    <title>Sin Comentarios</title>
+    <link href="http://tordek.me/posts/2014-12-03-sin-comentarios/index.html" />
+    <id>http://tordek.me/posts/2014-12-03-sin-comentarios/index.html</id>
+    <published>2014-12-03T00:00:00Z</published>
+    <updated>2014-12-03T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<p>Uno de los cambios que vinieron junto al nuevo sistema de blog (además de la misteriosa (?) desaparición de los posts viejos y vergonzosos) es que saqué los comentarios. No porque Hakyll no los soporte ni mucho menos; es más que fácil poner un Disqus al fondo y listo. Sino porque no agregan suficiente valor como para valer la pena.</p>
+<p>La gente que se tomó el tiempo de comentar siempre me agregó algo útil; pero pelear con los spambots era un desperdicio.</p>
+<p>Además, de esta manera, el que me quiere corregir, siempre puede escribir una respuesta en algún lado público, y me da más publicidad.</p>
+<p>Yay.</p>]]></summary>
+</entry>
+<entry>
+    <title>REST</title>
+    <link href="http://tordek.me/posts/2014-12-01-rest/index.html" />
+    <id>http://tordek.me/posts/2014-12-01-rest/index.html</id>
+    <published>2014-12-01T00:00:00Z</published>
+    <updated>2014-12-01T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<p>Están muy de moda las API que dicen ser REST, pero en lo único que tienen son URLs lindas.</p>
+<p>Pongamos algo en claro: tener URLs lindas no hace una API REST. Que sea HTTP no la hace REST. Que use los métodos que corresponden no la hace REST.</p>
+<p>Si tenemos que reducir la verificación de si algo es REST al elemento más simple, podemos empezar por una pregunta: ¿Un recurso tiene links a los otros recursos?</p>
+<p>Si la respuesta es “No”, entonces NO ES REST.</p>
+<p>La API de Twitter no es REST. Supongamos que queremos ver un tweet particular. Para eso tenemos que hacer una request a</p>
+<pre><code>GET statuses/show/:id</code></pre>
+<p>Linda URL. Clara, directa… Debe ser REST, ¿no?</p>
+<p>No.</p>
+<p>¿De dónde salió ese ID? ¿Por qué me dio un ID en vez de una URL?</p>
+<p>Antes de hacer la request del tweet hubo una request anterior para la autenticación del usuario. El último paso de la autenticación nos da varios valores; pero en muchos casos se usa como si sólo se pudieran mandar los relacionados a la autenticación. ¿Por qué no incluir datos del usuario? El más obvio es la URL del perfil (también podríamos incluir la URL de su página principal… y de ahí más links, por ejemplo, hacia cada uno de los tweets en su perfil). El ID igualmente lo teníamos que haber leído de alguno de esos lugares: de la misma lista de Tweets del perfil. En vez de solo poner un ID, ponemos un link al tweet.</p>
+<p><strong>Las URLs son los nuevos IDs</strong></p>
+<p>HATEOAS (Hypermedia As The Engine Of Application State) es uno de los pilares de REST. Nos dice que el Estado de la aplicación se altera mediante los vínculos provistos. Casi como si el recurso fuera un objeto en el cual llamamos a un método. Es el mismo objeto el que nos dice: “Para borrarme, mandá un DELETE a <em>esta URL</em>”, en vez de tener que encontrar un método de borrado al cual le pasamos un ID.</p>
+<p>Pero, ¿por qué es tan malo tener que armar las URL?</p>
+<ul>
+<li><p>Estamos multiplicando el trabajo:</p>
+<p>Si NO devolvemos un link…</p>
+<ul>
+<li>El creador de la API parsea el link para generar el contenido.</li>
+<li>El creador lo documenta “fuera de banda”</li>
+<li>Cada cliente tiene que armar su propio link.</li>
+</ul>
+<p>Mientras que si el creador de la API nos pasa un link…</p>
+<ul>
+<li>El creador de la API parsea el link</li>
+<li>El creador de la API genera el link (típicamente usando el mismo router para las dos cosas)</li>
+</ul></li>
+<li><p>Estamos exhibiendo valores innecesariamente. Las URLs bien armadas sin duda son lindas, pero un servicio REST podría funcionar perfectamente si todas las URLs apuntaran a UUIDs.</p>
+<p>Si en un sitio sabemos que la última respuesta que nos dieron está en <code>.../respuestas/12345</code>, es extremadamente fácil probar <code>.../respuestas/12344</code> a ver si encontramos algo. En cambio, si estuviera en <code>.../respuestas/021979ef-e183-4bb5-9dcf-28d4e0508c3f</code>, ¿qué probamos?</p>
+<p>Parece una simple capa de seguridad por oscuridad (especialmente si usamos un caso levemente más realista donde el ID es aleatorio, pero corto), pero también ayuda a prevenir que se filtre cierta información, como “¿Cuantas transacciones hizo este usuario?” o “¿Cuantos usuarios tiene el sitio?”</p></li>
+<li><p>La API sin links es más difícil de explorar. En la API con links, cada request nos apunta a las demás acciones que podemos tomar: “Tomá el Tweet. Si querés borrarlo, andá <em>acá</em>; si querés retweetearlo andá <em>acá</em>; si querés más detalles del usuario, andá <em>acá</em>”.</p></li>
+</ul>
+<p>Por supuesto, los links no son el único factor; solo que son el que más veo abusado por ahí. Demasiadas APIs que dicen ser REST pero no respetan uno de los elementos centrales, que es el <em>hypermedia</em>.</p>
+<p>Una API REST debe:</p>
+<ul>
+<li>Publicar recursos (no llamadas a procedimientos).</li>
+<li>Vinculados entre sí (links; no IDs).</li>
+<li>Que se modifican utilizando los métodos apropiados (GET, POST, PUT, DELETE, etc.).</li>
+</ul>
+<p>Si falla esas características no necesariamente es una “mala” API; solo que no es REST.</p>]]></summary>
+</entry>
+<entry>
+    <title>Rebuild. Rebrand.</title>
+    <link href="http://tordek.me/posts/2014-11-29-rebuild-rebrand/index.html" />
+    <id>http://tordek.me/posts/2014-11-29-rebuild-rebrand/index.html</id>
+    <published>2014-11-29T00:00:00Z</published>
+    <updated>2014-11-29T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<p>TL;DR: Tengo blog nuevo. Probablemente se actualice igual de frecuentemente que el otro.</p>
+<p>Está hecho con <a href="http://jaspervdj.be/hakyll/">Hakyll</a>, because Haskell.</p>
+<p>También tengo URL nueva, porque es más corta que un <code>.com.ar</code>, y aún así es más barata.</p>
+<p>Las entradas del blog anterior están… “en pausa”. Quizá repase y vuelva a subir alguna; los logs de 404 me dirán si alguna rinde. Por ahora, se van.</p>
+<p><em>Oh, I’m out there, Jerry, and I’m loving every minute of it</em></p>
+<p>P.D.: No sé hacer diseños; escucho opiniones/quejas/insultos. Bootstrap hace el 90%, yo solo pinto de rojo algunas cosas.</p>]]></summary>
+</entry>
+
+</feed>

@@ -1,0 +1,9 @@
+By Tordek -- @Tordek
+
+Thanks to:
+
+Tordek
+
+Using:
+
+Hakyll, Initializr

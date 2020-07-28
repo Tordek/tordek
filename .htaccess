@@ -1,0 +1,10 @@
+RewriteEngine On
+RewriteCond %{HTTP_USER_AGENT} !FeedBurner
+RewriteRule ^feed https://feeds.feedburner.com/Tordek [R]
+
+header set X-Tordek "Tordek"
+header set X-Pavatar "http://tordek.me/tordek-pavatar.png"
+header set X-Frame-Options DENY
+header set Content-Security-Policy-Report-Only "default-src 'self'; report-uri /report.php;"
+
+ErrorDocument 404 /404/index.html
