@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html class="no-js" lang="es-AR">
+    <head>
+        <meta charset="utf-8">
+        <!--[if IE]>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <![endif]-->
+        <title>2020-11-19-biplotter — Tordek</title>
+        <meta name="description" content>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="alternate" type="application/atom+xml" title="Tordek - ATOM Feed" href="http://feeds.feedburner.com/Tordek" />
+
+        <link rel="stylesheet" href="/css/main-built.css">
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+
+        <script src="js/main-built.js"></script>
+    </head>
+    <body vocab="http://schema.org/" typeof="Blog">
+    <div class="navbar-masthead">
+        <div class="navbar navbar-default navbar-fixed-top">
+          <div class="container-fluid">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="/" property="name">Tordek</a>
+            </div>
+
+            <div class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">
+                  <li class="active"><a href="/"><!--<span class="glyphicon glyphicon-home"></span> -->Blog</a></li>
+              </ul>
+              <ul class="nav navbar-nav navbar-right">
+                <li><a class="about" href="/about/"><span class="glyphicon glyphicon-question-sign"></span></a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <div class="container">
+            <div class="row">
+
+    <div class="col-lg-9 col-md-8">
+        <article class="post" property="blogPost" typeof="http://schema.org/BlogPosting">
+            <header>
+                <h1 property="headline">
+                  <a property="url" href="/posts/2020-11-19-biplotter/" title="Link permanente a '2020-11-19-biplotter'">2020-11-19-biplotter</a>
+                </h1>
+
+                <small> <time property="datePublished" datetime="2020-11-19">jueves, 19 de noviembre de 2020</time></small>
+
+                
+            </header>
+
+            <hr />
+            <div property="articleBody">
+            <h1 id="plotbot">PlotBot</h1>
+<p>Varias veces vi<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> este tipo de plotters verticales donde el cursor es controlado por un par de correas sostenidas por motores y siempre quise uno. Así que lo armé.</p>
+<h2 id="parte-1-cómo-y-por-qué">Parte 1: ¿Cómo y por qué?</h2>
+<p>Todo empezó con una suposición: es suficiente con determinar la longitud de los segmentos. Un grafico más tarde tenía esto:</p>
+<figure>
+<img src="/images/foo.png" title="Math" alt /><figcaption>here</figcaption>
+</figure>
+<p>Inicialmente lo pensé como la intersección de dos círculos; recién después de implementaciones me di cuenta que se podía simplificar a «la distancia del punto a los centros» (el modelo con dos círculos es más fácil de visualizar porque no hace falta calcular la intersección).</p>
+<p>El modelo es menos que perfecto; si uno se pone a leer sobre el tema (cosa que no hice inicialmente) empiezan a aparecer problemas con la tensión de las cuerdas que hacen que se pierda precisión, y la inercia que causa rayas no deseadas… pero para dibujar monas chinas en un pizarrón no son un tema de vida o muerte.</p>
+<p>Cinco minutos de matemática más tarde, arranqué Processing[^Está muy lindo para prototipar cosas visuales sin mucho laburo de antemano. Un abrazo a David Schiffman y Coding Rainbow.] para iniciar un prototipo que me permita visualizar la idea: dos círculos en esquinas opuestas, y calculamos el radio de cada uno como la distancia de su centro al punto del mouse, resultando en una intersección:</p>
+<pre class="processing"><code>PVector c1p = new PVector(0, 0);
+PVector c2p = new PVector(800, 0);
+
+void setup() {
+  size(800, 600);
+}
+
+void draw() {
+  PVector mousePos = new PVector(mouseX, mouseY);
+  float c1r = mousePos.dist(c1p);
+  float c2r = mousePos.dist(c2p);
+
+  background(224);
+  noFill();
+  stroke(128);
+  circle(c1p.x, c1p.y, 2 * c1r);
+  circle(c2p.x, c2p.y, 2 * c2r);
+  stroke(0);
+  line(c1p.x, c1p.y, mouseX, mouseY);
+  line(c2p.x, c2p.y, mouseX, mouseY);
+}</code></pre>
+<p><img src="Visualization" /></p>
+<p>Resulta que este sistema de coordenadas se llama «<a href="https://mathworld.wolfram.com/BipolarCoordinates.html">Bicéntrico</a>», solo que corro <span class="math inline"><em>y</em></span> hacia abajo para que <span class="math inline">(0, 0)</span> no quede entre los dos polos: en ese punto las cuerdas tienen máxima tensión.</p>
+<p>Armado con confianza poco merecida, avancé.</p>
+<h2 id="parte-2-el-espantapájaros-y-su-cerebro.">Parte 2: El espantapájaros y su cerebro.</h2>
+<p>Para esta receta necesitás: - Un Arduino Uno - Un <em>shield</em> Arduino CNC (o al menos un par de drivers de motor) - Dos motores paso a paso para controlar la posición (yo usé <a href="https://www.lulzbot.com/store/parts/nema-17-stepper-motor">unos parecidos a estos</a>) - Una forma de montar los motores (yo usé <a href="https://www.thingiverse.com/thing:3570247">un par de piezas impresas en 3D</a>) - Una cuerda, correa o similar, con un a forma de sujetarla a los motores (yo usé la correa de una persiana rodante, y <a href="https://www.thingiverse.com/thing:467647">otra pieza impresa</a>) - Un marcador, lapicera, lápiz, o similar. - Una forma de montar el marcador a la cuerda (yo hice… cosas raras con un par de piezas descartadas de un intento anterior)</p>
+<p>Opcional: - Un Servo, para controlar el marcador.</p>
+<p>El código del Arduino es una traducción fiel (excepto por la clase <code>PVector</code>) del de Processing. El prototipo en Processing estaba escrito pensando en las limitaciones del Arduino: el motor no conoce su posición absoluta, y la cantidad de pasos en su movimiento depende de los engranajes del motor como del diámetro del eje[^ En una versión anterior había usado un piolín envuelto por el eje. Funcionó, pero el cambio del diámetro en el eje al envolverse el piolín era suficiente para agregar una distorsión enorme]. Traté de mantener ambas versiones lo más similares que se podía: si ambas se comportan igual, es más fácil <em>debuggear</em> la que me deja ver exactamente dónde están las cosas. Muchos de estos factores son configurables, así si querés hacerlo más grande, más chico, o con menos precisión, se puede configurar.</p>
+<p>La diferencia principal entre la versión de Arduino y la de Processing es que en la de Arduino en cada <code>loop()</code> se parsea la línea, se calcula el segmento, y se mueve el motor; mientras que la de Processing, como es más visual, divide la ejecución en varios pasos, así se la puede ver animada.</p>
+<h3 id="parte-2a-do-you-speak-a-my-language">Parte 2a: Do you speak-a my language?</h3>
+<p>Todo muy lindo con que el cursor se mueva, pero ¿cómo le digo a dónde? Afortunadeamente, como muchos de mis problemas, ya lo resolvieron 30 años de que nazca: G-Code es un lenguaje usado en <em>CNC</em> para comunicarse con máquinas herramienta.</p>
+<p>Cada línea tiene una serie de instrucciones que le dicen al puntero hacia dónde y cómo tiene que moverse. Hay un montón de instrucciones, pero la mayoría no me interesan. Acá sólo uso:</p>
+<ul>
+<li><code>G00</code>: Movimiento rápido; no importa el camino. En mi implementación resulta en una curva.</li>
+<li><code>G01</code>: Movimiento lineal. En mi implementación lo logro avanzando en segmentos de una longitud fija.</li>
+<li><code>G02</code> y <code>G03</code>: Movimiento circular. También implementado con una serie de segmentos.</li>
+<li><code>X</code> e <code>Y</code>: Posición (absoluta) del destino.</li>
+<li><code>I</code> y <code>J</code>: Posición (relativa) del centro del círculo.</li>
+<li><code>R</code>: Radio del círculo.</li>
+<li><code>Z</code>: No lo implementé aún, pero controla la profundidad del corte o, en mi caso, si el marcador escribe o no.</li>
+</ul>
+<p>El modo de fallo es bastante generoso: mientras sea algo parseable, lo aceptamos; si es una instrucción que no conocemos, la ignoramos.</p>
+<p>El paso siguiente fue implementar el <em>parser</em> de G-Code. Como sabía que al Arduino le iba a hablar mediante puerto serie, lo implementé para que consuma un caracter a la vez (aunque Arduino también me da un método <code>readFloat()</code> que me simplifica bocha):</p>
+<ul>
+<li>Si es un <code>%</code>, lo ignoramos; indica el inicio del programa, pero es opcional.</li>
+<li>Si es un <code>(</code>, descartamos hasta encontrar el <code>)</code>; son comentarios.</li>
+<li>Si es un espacio, lo salteamos.</li>
+<li>Si es la letra ‘G’, sólo me interesa si es 0, 1, 2, o 3; los demás modos no me importan (pero, si me importaran, por ejemplo, para cambiar a pulgadas, los implementaría acá).</li>
+<li>Finalmente, cualquier otro caracter (que damos por asumido es una letra), simplemente almacenamos el valor.</li>
+</ul>
+<p>Algunos valores son especiales y permanecen seteados (como el tipo de movimiento que se ejecuta); otros sólo nos importan para el comando actual (como el radio del círculo). Para hacerla fácil, el parser siempre mantiene los valores anteriores.</p>
+<h3 id="parte-2b-a-little-bit-at-a-time">Parte 2b: A little bit at a time</h3>
+<p>Procesamos un poquito los valores obtenidos, y podemos hacer interpolación en pasos de longitud fija, cosa que se repite hasta que estemos suficientemente cerca del punto final.</p>
+<p>Finalmente, para cada segmento de la interpolación hay que mover los motores, que lo hacemos con un algoritmo de dibujo de líneas bastante simple: Calculamos cuantos pasos tiene que dar cada motor con respecto al otro, y vamos moviendo un paso, revisando si estamos muy lejos de la inclinación requerida, y moviendo el otro cuando haga falta.</p>
+<p>Aprovechamos también para calcular la distancia (en realidad, el cuadrado de la distancia, para ahorrar una raíz cuadrada en un bucle tan cerrado), y hacer una leve pausa (ajustada por la distancia) para fijar la velocidad del movimiento.</p>
+<p>Acá sería un excelente lugar para poner un failsafe y parar la máquina si sale fuera del rango de impresión definido.</p>
+<h2 id="enough-talk">Enough talk</h2>
+<p>Funciona sorprendentemente bien para lo simple que es:</p>
+<p><img src /> <img src /></p>
+<p>Y lo podés ver en movimiento:</p>
+<p><img src /></p>
+<section class="footnotes" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1" role="doc-endnote"><p>Remember, remember…<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+            </div>
+
+            <footer>
+            
+                <p>Tags: <span property="keywords"></p>
+            
+            </footer>
+        </article>
+    </div>
+</div>
+
+
+      <hr>
+
+      <footer>
+        <p>&copy; <span property="author" title="Guillermo O. Freschi">Tordek</span> 2014</p>
+        <p>Todos el contenido licenciado bajo <a property="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a> a menos que se indique lo contrario.</p>
+      </footer>
+    </div> 
+    </body>
+</html>
