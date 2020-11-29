@@ -60,9 +60,7 @@
             <p>Varias veces vi<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> este tipo de plotters verticales donde el cursor es controlado por un par de correas sostenidas por motores y siempre quise uno. Así que lo armé.</p>
 <h1 id="parte-1-cómo-y-por-qué">Parte 1: ¿Cómo y por qué?</h1>
 <p>Todo empezó con una suposición: es suficiente con determinar la longitud de los segmentos. Un grafico más tarde tenía esto:</p>
-<figure>
-<img src="/images/plotbot-geometry-visualize.png" title="El sistema de coordenadas" alt /><figcaption>Visualización</figcaption>
-</figure>
+<p><img src="/images/plotbot-geometry-visualize.png" title="El sistema de coordenadas" class="img-responsive" /></p>
 <p>Inicialmente lo pensé como la intersección de dos círculos; recién después de un par de implementaciones me di cuenta que se podía simplificar a «la distancia del punto a los centros» (el modelo con dos círculos es más fácil de visualizar porque no hace falta calcular la intersección).</p>
 <p>El modelo es menos que perfecto; si uno se pone a leer sobre el tema (cosa que no hice inicialmente) empiezan a aparecer problemas con la tensión de las cuerdas que hacen que se pierda precisión, y la inercia que causa rayas no deseadas… pero para dibujar monas chinas en un pizarrón no son un tema de vida o muerte.</p>
 <p>Cinco minutos de matemática más tarde, arranqué Processing<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> para iniciar un prototipo que me permita visualizar la idea: dos círculos en esquinas opuestas, y calculamos el radio de cada uno como la distancia de su centro al punto del mouse, resultando en una intersección:</p>
@@ -87,9 +85,7 @@ void draw() {
   line(c1p.x, c1p.y, mouseX, mouseY);
   line(c2p.x, c2p.y, mouseX, mouseY);
 }</code></pre>
-<figure>
-<img src="/images/plotbot-processing-test.png" title="El prototipo en Processing" alt /><figcaption>Processing</figcaption>
-</figure>
+<p><img src="/images/plotbot-processing-test.png" title="El prototipo en Processing" class="img-responsive" /></p>
 <p>Resulta que este sistema de coordenadas se llama «<a href="https://mathworld.wolfram.com/BipolarCoordinates.html">Bicéntrico</a>»; una vez que encontré esto me simplificó un montón de ecuaciones. Lo único que hago de especial es correr <span class="math inline"><em>y</em></span> hacia abajo para que <span class="math inline">(0, 0)</span> no quede entre los dos polos: en ese punto las cuerdas tendrían máxima tensión y un movimiento equivocado podría romper todo. Con esto tengo un poquito más de seguridad.</p>
 <p>Armado con confianza poco merecida, avancé.</p>
 <h1 id="parte-2-el-espantapájaros-y-su-cerebro.">Parte 2: El espantapájaros y su cerebro.</h1>
@@ -135,9 +131,7 @@ void draw() {
 <p>Acá sería un excelente lugar para poner un failsafe y parar la máquina si sale fuera del rango de impresión definido.</p>
 <h1 id="enough-talk">Enough talk</h1>
 <p>Funciona sorprendentemente bien para lo simple que es:</p>
-<figure>
-<img src="/images/plotbot-tordek.jpg" alt /><figcaption>Tordek</figcaption>
-</figure>
+<p><img src="/images/plotbot-tordek.jpg" title="El pizarrón con 'Tordek' escrito" class="img-responsive" /></p>
 <p>El path fue generado directamente por Inkscape.</p>
 <section class="footnotes" role="doc-endnotes">
 <hr />
