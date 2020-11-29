@@ -43,7 +43,7 @@ void draw() {
   line(c1p.x, c1p.y, mouseX, mouseY);
   line(c2p.x, c2p.y, mouseX, mouseY);
 }</code></pre>
-<p><img src="/images/plotbot-processing-test.png" title="El prototipo en Processing" class="img-responsive" /></p>
+<p><img src="/images/plotbot-processing-test.jpg" title="El prototipo en Processing" class="img-responsive" /></p>
 <p>Resulta que este sistema de coordenadas se llama «<a href="https://mathworld.wolfram.com/BipolarCoordinates.html">Bicéntrico</a>»; una vez que encontré esto me simplificó un montón de ecuaciones. Lo único que hago de especial es correr <span class="math inline"><em>y</em></span> hacia abajo para que <span class="math inline">(0, 0)</span> no quede entre los dos polos: en ese punto las cuerdas tendrían máxima tensión y un movimiento equivocado podría romper todo. Con esto tengo un poquito más de seguridad.</p>
 <p>Armado con confianza poco merecida, avancé.</p>
 <h1 id="parte-2-el-espantapájaros-y-su-cerebro.">Parte 2: El espantapájaros y su cerebro.</h1>
